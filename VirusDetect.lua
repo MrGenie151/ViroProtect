@@ -19,6 +19,8 @@ local function mainFunc()
 	local isVirus = false
 	local virusesFound = 0
 	local susScripts = {}
+	local VERYsusScripts = {}
+	local countTally = 0
 	print("Beginning Scan!")
 	for _, z in pairs(placesToScan) do
 		for i, object in pairs(z:GetDescendants()) do
@@ -27,20 +29,23 @@ local function mainFunc()
 				if object:IsA("Script") then
 					for p,v in pairs(scriptTriggerNames) do
 						if string.match(object.Name,v) then
-							object:Destroy()
+							object.Disabled = true
 							isVirus = true
+							table.insert(VERYsusScripts,object:GetFullName())
 						end
 					end
 					for _,v in pairs(scriptSourceTriggers) do
 						if string.match(object.Source,v) then
 							--local anc = object:FindFirstAncestorofClass("Model")
+							object.Disabled = true
 							table.insert(susScripts,object:GetFullName())
 						end
 					end
 					for _,aba in pairs(scriptSourceDeletionTriggers) do
 						if string.match(object.Source,aba) then
-							object:Destroy()
+							object.Disabled = true
 							isVirus = true
+							table.insert(VERYsusScripts,object:GetFullName())
 						end
 					end
 				elseif object:IsA("RotateP") then
@@ -57,12 +62,22 @@ local function mainFunc()
 					virusesFound += 1
 				end
 			end
-			wait()
+			countTally += 1
+			if countTally == 5 then
+				wait()
+				countTally = 0
+			end
 		end
 	end
 	print("Scan Complete! There where ".. virusesFound.." viruses found!")
+	if #VERYsusScripts > 0 then
+		warn("These scripts were flagged as VERY DANGEROUS and disabled. It is recommended you remove them anyway.")
+		for _, susOb in pairs(VERYsusScripts) do
+			print(susOb)
+		end
+	end
 	if #susScripts > 0 then
-		print("These models has some scripts with suspicous code... ")
+		warn("These models has some scripts with suspicous code... ")
 		for _, c in pairs(susScripts) do
 			print(c)
 		end
